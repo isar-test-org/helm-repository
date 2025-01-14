@@ -1,5 +1,16 @@
 apiVersion: v1
 entries:
+  app-deployment:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-01-14T14:41:40.39525267Z"
+    description: A Helm chart for Kubernetes
+    digest: 83b9dd761df43b05965bf56691b58dc35ecb871aeb817ae7d8bbecf177bcd6a9
+    name: app-deployment
+    type: application
+    urls:
+    - app-deployment-0.1.0.tgz
+    version: 0.1.0
   example:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -11,4 +22,15 @@ entries:
     urls:
     - example-0.1.0.tgz
     version: 0.1.0
-generated: "2025-01-14T13:17:03.176916742Z"
+  test2:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-01-14T14:41:40.656876053Z"
+    description: A Helm chart for Kubernetes
+    digest: 85465edb28a7d1fdf9c064c05f83eeb488722888d04dc8485cffc35fbcbd2d28
+    name: test2
+    type: application
+    urls:
+    - test2-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-01-14T14:41:40.656882375Z"
