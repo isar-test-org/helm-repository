@@ -19,6 +19,12 @@ serviceAccount:
 podAnnotations: {}
 podLabels: {}
 
+envFrom: {}
+  # - secretRef:
+  #     name: my-secret
+  # - configMapRef:
+  #     name: my-configmap
+
 podSecurityContext: {}
   # fsGroup: 2000
 
