@@ -21,9 +21,9 @@ jobs:
       - name: Find all changed Chart.yaml
         id: changed-files
         uses: tj-actions/changed-files@v45
-        with:
-          since_last_remote_commit: false
-          # files: "**/Chart.yaml"
+        # with:
+        #   since_last_remote_commit: false
+        #   files: "**/Chart.yaml"
       
       - name: Verify Chart.yaml modification
         if: steps.changed-files.outcome.all_changed_files_count == 0
