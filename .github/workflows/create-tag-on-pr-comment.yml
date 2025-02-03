@@ -63,6 +63,8 @@ jobs:
       - create_tag
     if: needs.changed_charts.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      changed_charts: ${{ steps.helm-release.outputs.changed_charts }}
 
     steps:
     - name: Get PR branch
@@ -94,6 +96,7 @@ jobs:
       uses: azure/setup-helm@v4
 
     - name: Run chart-releaser
+      id: helm-release
       uses: helm/chart-releaser-action@v1.7.0
       with:
         skip_existing: false
@@ -112,12 +115,24 @@ jobs:
       - name: Add comment to PR
         uses: actions/github-script@v7
         if: ${{ always() && !cancelled()}}
+        env:
+          CHARTS: ${{ needs.pre_release_tag.outputs.changed_charts }}
         with:
           script: |
+            const chartsList = process.env.CHARTS.split(',').join('\n');
             const name = '${{ github.workflow   }}';
             const url = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}';
             const success = '${{ needs.pre_release_tag.result }}' === 'success';
-            const body = `${name}: ${success ? 'succeeded ✅ created pre-release tags' : 'failed ❌'}\n${url}`;
+            const body = `
+              ${name}: 
+                ${success ?
+                 'succeeded ✅ created pre-release tags for 
+                  \`\`\`
+                  ${chartsList}
+                  \`\`\`
+                 ' 
+                 : 'failed ❌'}\n${url}
+              `;
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
