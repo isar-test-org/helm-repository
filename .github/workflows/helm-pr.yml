@@ -30,7 +30,7 @@ jobs:
         env:
           CHANGED_CHARTS: ${{steps.changed-files.outcome.all_changed_files}}
         run: |
-          echo ${CHANGED_CHARTS}
+          echo "${CHANGED_CHARTS}"
           echo "::error::You have modified a chart. but didnt change the Chart.yaml"
           exit 1
       
