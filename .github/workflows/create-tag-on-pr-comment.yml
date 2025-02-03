@@ -36,10 +36,15 @@ jobs:
       all_changed_files: ${{  steps.changed-files.outputs.all_changed_files }}
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
+      - name: Get PR branch
+        uses: xt0rted/pull-request-comment-branch@v3.0.0
+        id: comment-branch
+      
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ steps.comment-branch.outputs.head_ref }}
       
       - name: Find all changed Chart.yaml
         id: changed-files
