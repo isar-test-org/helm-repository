@@ -28,7 +28,7 @@ jobs:
       - name: Verify Chart.yaml modification
         if: steps.changed-files.outcome.all_changed_files_count == 0
         run: |
-          echo "${{steps.changed-files.outcome.all_changed_files_count}}"
+          echo "${{steps.changed-files.outcome.all_changed_files}}"
           echo "::error::You have modified a chart. but didnt change the Chart.yaml"
           exit 1
       
