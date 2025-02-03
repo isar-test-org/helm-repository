@@ -23,7 +23,7 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           since_last_remote_commit: false
-          files: "**/Chart.yaml"
+          # files: "**/Chart.yaml"
       
       - name: Verify Chart.yaml modification
         if: steps.changed-files.outcome.all_changed_files_count == 0
