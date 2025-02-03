@@ -54,6 +54,7 @@ jobs:
         with:
           since_last_remote_commit: false
           files: "**/Chart.yaml"
+          base_sha: "main"
   
   pre_release_tag:
     permissions: 
