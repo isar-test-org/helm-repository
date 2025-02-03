@@ -29,9 +29,12 @@ jobs:
   changed_charts:
     needs: create_tag
     runs-on: ubuntu-latest
+    permissions: 
+      pull-requests: read
     outputs:
       all_changed_files_count: ${{  steps.changed-files.outputs.all_changed_files_count }}
       all_changed_files: ${{  steps.changed-files.outputs.all_changed_files }}
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,7 +56,7 @@ jobs:
     needs: 
       - changed_charts
       - create_tag
-    if: ${{ needs.changed_charts.outputs.all_changed_files_count != 0 }}
+    if: needs.changed_charts.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -67,15 +70,14 @@ jobs:
         ref: ${{ steps.comment-branch.outputs.head_ref }} 
     
     - name: Change Chart.yaml version
+      env:
+        CHART_FILES: ${{ needs.changed_charts.outputs.all_changed_files }}
+        PRE_RELEASE_TAG: ${{ needs.create_tag.outputs.tag_name }}
       run: |
-        # Assuming your Chart.yaml files are stored in a variable
-        chart_files="${{ needs.changed_charts.outputs.all_changed_files }}"
-        pre_release_tag="${{ needs.create_tag.outputs.tag_name }}"
-
         # Loop over each Chart.yaml file
-        for chart in $chart_files; do
+        for chart in $CHART_FILES; do
           # Use yq to append -develop to the version key
-          yq eval '.version += "-${pre_release_tag}"' -i "$chart"
+          yq eval '.version += "-${PRE_RELEASE_TAG}"' -i "$chart"
         done
     
     - name: Configure Git
