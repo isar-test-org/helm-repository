@@ -55,6 +55,7 @@ jobs:
           since_last_remote_commit: false
           files: "**/Chart.yaml"
           base_sha: "main"
+          sha: ${{ steps.comment-branch.outputs.head_ref }}
   
   pre_release_tag:
     permissions: 
