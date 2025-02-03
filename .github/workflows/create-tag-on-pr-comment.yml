@@ -30,7 +30,9 @@ jobs:
     needs: create_tag
     runs-on: ubuntu-latest
     permissions: 
+      contents: read
       pull-requests: read
+      issues: read
     outputs:
       all_changed_files_count: ${{  steps.changed-files.outputs.all_changed_files_count }}
       all_changed_files: ${{  steps.changed-files.outputs.all_changed_files }}
@@ -44,7 +46,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ steps.comment-branch.outputs.head_ref }}
+          ref: ${{ steps.comment-branch.outputs.head_sha }}
+      
+      - name: Debug sha
+        env:
+          HEAD: ${{ steps.comment-branch.outputs.head_sha }}
+          BASE: ${{ steps.comment-branch.outputs.base_sha }}
+        run: |
+          echo "HEAD sha is in $(git branch -a --contains $HEAD)"
+          echo "BASE sha is in $(git branch -a --contains $BASE)"
       
       - name: Find all changed Chart.yaml
         id: changed-files
@@ -52,6 +62,8 @@ jobs:
         with:
           since_last_remote_commit: false
           files: "**/Chart.yaml"
+          base_sha: main
+          sha: ${{ steps.comment-branch.outputs.head_sha }}
   
   pre_release_tag:
     permissions: 
