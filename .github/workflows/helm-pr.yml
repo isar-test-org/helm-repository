@@ -22,8 +22,6 @@ jobs:
       - name: Find all changed Chart.yaml
         id: changed-files
         uses: tj-actions/changed-files@v45
-        with:
-          files: charts/**/Chart.yaml
       
       - name: Verify Chart.yaml modification
         if: steps.changed-files.outputs.any_changed == 'true'
