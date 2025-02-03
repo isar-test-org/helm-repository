@@ -40,11 +40,10 @@ jobs:
             This PR looks good to me! ✅ However, consider verifying it with a pre-release tag before merging.
 
             The charts that will get the new tag are
-            \` $CHARTS \`
+            \` ${CHARTS} \`
             
-            !!!secondary
-            Cant see a chart you edited? make sure you changed the Chart.yaml
-            !!!
+            > [!NOTE]  
+            > Cant see a chart you edited? make sure you changed the Chart.yaml
 
             ### How to Create a Pre-release Tag:
             To create a pre-release tag, simply comment:
