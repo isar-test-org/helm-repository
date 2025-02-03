@@ -40,7 +40,7 @@ jobs:
             This PR looks good to me! ✅ However, consider verifying it with a pre-release tag before merging.
 
             The charts that will get the new tag are
-            \` ${CHARTS} \`
+            \` ${process.env.CHARTS} \`
             
             > [!NOTE]  
             > Cant see a chart you edited? make sure you changed the Chart.yaml
