@@ -10,8 +10,7 @@ on:
 jobs:
   verify:
     permissions:
-      contents: write
-      pull-requests: read
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,10 +26,7 @@ jobs:
       
       - name: Verify Chart.yaml modification
         if: steps.changed-files.outputs.any_changed != 'true'
-        env:
-          CHANGED_CHARTS: ${{steps.changed-files.outputs.all_changed_files}}
         run: |
-          echo "${CHANGED_CHARTS}"
           echo "::error::You have modified a chart. but didnt change the Chart.yaml"
           exit 1
       
