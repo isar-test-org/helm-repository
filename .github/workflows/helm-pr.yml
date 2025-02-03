@@ -23,7 +23,6 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
-          since_last_remote_commit: false
           files: charts/**/Chart.yaml
       
       - name: Verify Chart.yaml modification
