@@ -1,0 +1,120 @@
+name: Create Tag on PR Comment
+
+on:
+  issue_comment:                                 
+    types: [created]
+
+jobs:
+  create_tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.extract_tag.outputs.tag_name }}
+    # Only run if the comment is on a PR and starts with "/pre-release"
+    if: |
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/pre-release')
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Extract Tag Name
+      id: extract_tag
+      run: |
+        # Extract the tag name from the comment (e.g., "alpha1")
+        TAG_NAME=$(echo "${{ github.event.comment.body }}" | awk '{print $2}')
+        echo "Extracted tag: $TAG_NAME"
+        echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+    
+  changed_charts:
+    needs: create_tag
+    runs-on: ubuntu-latest
+    outputs:
+      all_changed_files_count: ${{  steps.changed-files.outputs.all_changed_files_count }}
+      all_changed_files: ${{  steps.changed-files.outputs.all_changed_files }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Find all changed Chart.yaml
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          since_last_remote_commit: false
+          files: "**/Chart.yaml"
+  
+  pre_release_tag:
+    permissions: 
+        contents: write
+        pull-requests: read
+        issues: read
+    needs: 
+      - changed_charts
+      - create_tag
+    if: ${{ needs.changed_charts.outputs.all_changed_files_count != 0 }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get PR branch
+      uses: xt0rted/pull-request-comment-branch@v3.0.0
+      id: comment-branch
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ steps.comment-branch.outputs.head_ref }} 
+    
+    - name: Change Chart.yaml version
+      run: |
+        # Assuming your Chart.yaml files are stored in a variable
+        chart_files="${{ needs.changed_charts.outputs.all_changed_files }}"
+        pre_release_tag="${{ needs.create_tag.outputs.tag_name }}"
+
+        # Loop over each Chart.yaml file
+        for chart in $chart_files; do
+          # Use yq to append -develop to the version key
+          yq eval '.version += "-${pre_release_tag}"' -i "$chart"
+        done
+    
+    - name: Configure Git
+      run: |
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+    - name: Install Helm
+      uses: azure/setup-helm@v4
+
+    - name: Run chart-releaser
+      uses: helm/chart-releaser-action@v1.7.0
+      with:
+        skip_existing: false
+        packages_with_index: true
+      env:
+        CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+  
+  comment_result:
+    runs-on: ubuntu-latest
+    permissions: 
+      pull-requests: write  # Minimum required permission
+    needs: 
+      - pre_release_tag
+
+    steps:
+      - name: Add comment to PR
+        uses: actions/github-script@v7
+        if: ${{ always() && !cancelled()}}
+        with:
+          script: |
+            const name = '${{ github.workflow   }}';
+            const url = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}';
+            const success = '${{ needs.pre_release_tag.result }}' === 'success';
+            const body = `${name}: ${success ? 'succeeded ✅ created pre-release tags' : 'failed ❌'}\n${url}`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })

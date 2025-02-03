@@ -1,0 +1,54 @@
+name: Release Charts
+
+on: 
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Find all changed Chart.yaml
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          since_last_remote_commit: false
+          files: "**/Chart.yaml"
+      
+      - name: Verify Chart.yaml modification
+        if: steps.changed-files.outcome.all_changed_files_count == 0
+        run: |
+          echo "::error::You have modified a chart. but didnt change the Chart.yaml"
+          exit 1
+      
+      - name: Comment on PR with Pre-release Instructions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commentBody = `
+            This PR looks good to me! ✅ However, consider verifying it with a pre-release tag before merging.
+
+            ### How to Create a Pre-release Tag:
+            To create a pre-release tag, simply comment:
+
+            \`/pre-release <tag-name>\`
+
+            This helps ensure stability before the final release.
+            `;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
