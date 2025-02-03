@@ -30,7 +30,9 @@ jobs:
     needs: create_tag
     runs-on: ubuntu-latest
     permissions: 
+      contents: read
       pull-requests: read
+      issues: read
     outputs:
       all_changed_files_count: ${{  steps.changed-files.outputs.all_changed_files_count }}
       all_changed_files: ${{  steps.changed-files.outputs.all_changed_files }}
