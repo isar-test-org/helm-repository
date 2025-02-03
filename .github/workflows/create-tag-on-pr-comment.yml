@@ -82,7 +82,7 @@ jobs:
         # Loop over each Chart.yaml file
         for chart in $CHART_FILES; do
           # Use yq to append -develop to the version key
-          yq eval '.version += "-${PRE_RELEASE_TAG}"' -i "$chart"
+          yq eval ".version = .version + \"-$PRE_RELEASE_TAG\"" -i "$chart"
         done
     
     - name: Configure Git
