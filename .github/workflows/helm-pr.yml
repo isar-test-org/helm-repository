@@ -8,9 +8,9 @@ on:
 
 
 jobs:
-  release:
+  verify:
     permissions:
-      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,21 +22,44 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
-          since_last_remote_commit: false
-          files: "**/Chart.yaml"
+          files: charts/**/Chart.yaml
       
       - name: Verify Chart.yaml modification
-        if: steps.changed-files.outcome.all_changed_files_count == 0
+        if: steps.changed-files.outputs.any_changed != 'true'
         run: |
           echo "::error::You have modified a chart. but didnt change the Chart.yaml"
           exit 1
       
+      - name: Install Helm
+        uses: azure/setup-helm@v4    
+
+      - name: Helm Lint
+        run: |
+          helm lint charts/*
+          if [ $? -ne 0 ]; then
+            echo "Helm lint failed"
+            exit 1
+          fi
+
       - name: Comment on PR with Pre-release Instructions
         uses: actions/github-script@v7
+        env:
+          CHARTS: ${{ steps.changed-files.outputs.all_changed_files }}
         with:
           script: |
+            // Split the CHARTS string by spaces and join with newlines
+            const chartsList = process.env.CHARTS.split(' ').join('\n');
+
             const commentBody = `
             This PR looks good to me! ✅ However, consider verifying it with a pre-release tag before merging.
+
+            The charts that will get the new tag are:
+            \`\`\`
+            ${chartsList}
+            \`\`\`
+
+            > [!NOTE]  
+            > Can't see a chart you edited? Make sure you changed the Chart.yaml.
 
             ### How to Create a Pre-release Tag:
             To create a pre-release tag, simply comment:
