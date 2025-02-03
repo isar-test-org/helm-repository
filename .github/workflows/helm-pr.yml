@@ -11,6 +11,7 @@ jobs:
   verify:
     permissions:
       contents: write
+      pull-requests: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,16 +22,16 @@ jobs:
       - name: Find all changed Chart.yaml
         id: changed-files
         uses: tj-actions/changed-files@v45
-        # with:
-        #   since_last_remote_commit: false
-        #   files: "**/Chart.yaml"
+        with:
+          since_last_remote_commit: false
+          files: charts/**/Chart.yaml
       
       - name: Verify Chart.yaml modification
-        if: steps.changed-files.outcome.all_changed_files_count == 0
+        if: steps.changed-files.outputs.any_changed == 'true'
         env:
           CHANGED_CHARTS: ${{steps.changed-files.outcome.all_changed_files}}
         run: |
-          echo "${CHANGED_CHARTS}"
+          echo "${CHANGED_CHARTS}""
           echo "::error::You have modified a chart. but didnt change the Chart.yaml"
           exit 1
       
