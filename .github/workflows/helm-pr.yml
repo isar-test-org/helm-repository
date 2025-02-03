@@ -22,11 +22,13 @@ jobs:
       - name: Find all changed Chart.yaml
         id: changed-files
         uses: tj-actions/changed-files@v45
+        with:
+          files: charts/**/Chart.yaml
       
       - name: Verify Chart.yaml modification
-        if: steps.changed-files.outputs.any_changed == 'true'
+        if: steps.changed-files.outputs.any_changed != 'true'
         env:
-          CHANGED_CHARTS: ${{steps.changed-files.outcome.all_changed_files}}
+          CHANGED_CHARTS: ${{steps.changed-files.outputs.all_changed_files}}
         run: |
           echo "${CHANGED_CHARTS}"
           echo "::error::You have modified a chart. but didnt change the Chart.yaml"
