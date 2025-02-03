@@ -52,7 +52,7 @@ jobs:
         env:
           HEAD: ${{ steps.comment-branch.outputs.head_sha }}
           BASE: ${{ steps.comment-branch.outputs.base_sha }}
-        run:
+        run: |
           echo "HEAD sha is in $(git branch -a --contains $HEAD)"
           echo "BASE sha is in $(git branch -a --contains $BASE)"
       
