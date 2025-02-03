@@ -36,14 +36,19 @@ jobs:
           CHARTS: ${{ steps.changed-files.outputs.all_changed_files }}
         with:
           script: |
+            // Split the CHARTS string by spaces and join with newlines
+            const chartsList = process.env.CHARTS.split(' ').join('\n');
+
             const commentBody = `
             This PR looks good to me! ✅ However, consider verifying it with a pre-release tag before merging.
 
-            The charts that will get the new tag are
-            \` ${process.env.CHARTS} \`
-            
+            The charts that will get the new tag are:
+            \`\`\`
+            ${chartsList}
+            \`\`\`
+
             > [!NOTE]  
-            > Cant see a chart you edited? make sure you changed the Chart.yaml
+            > Can't see a chart you edited? Make sure you changed the Chart.yaml.
 
             ### How to Create a Pre-release Tag:
             To create a pre-release tag, simply comment:
